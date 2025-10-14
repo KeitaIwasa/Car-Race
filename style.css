@@ -1,0 +1,204 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  background: radial-gradient(circle at top, #202733 0%, #10141d 60%, #07090f 100%);
+  color: #f4f7ff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.layout {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(320px, 420px) minmax(200px, 280px);
+  align-items: start;
+}
+
+.game-shell {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 100%);
+  border-radius: 20px;
+  padding: 1rem 1rem 0.5rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.hud-panel {
+  background: rgba(17, 24, 39, 0.65);
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  min-width: 90px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  background: #090c14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.overlay.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay h1 {
+  margin: 0;
+  font-size: 2.4rem;
+  letter-spacing: 0.05em;
+}
+
+.overlay p {
+  max-width: 280px;
+  margin: 1.4rem 0 1.8rem;
+  line-height: 1.6;
+}
+
+.btn {
+  background: linear-gradient(135deg, #ff4d4d, #ff824d);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(255, 77, 77, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover,
+.btn:active {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px rgba(255, 77, 77, 0.45);
+}
+
+.controls {
+  display: none;
+  margin-top: 0.75rem;
+  gap: 1rem;
+}
+
+.touch-btn {
+  flex: 1;
+  padding: 0.9rem 0;
+  font-size: 1.2rem;
+  background: rgba(76, 86, 106, 0.4);
+  box-shadow: none;
+}
+
+.touch-btn:active {
+  background: rgba(255, 130, 77, 0.55);
+}
+
+.jump-btn {
+  background: rgba(45, 212, 191, 0.6);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.jump-btn:active {
+  background: rgba(45, 212, 191, 0.85);
+}
+
+.sidebar {
+  background: rgba(10, 15, 26, 0.7);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.sidebar ul {
+  padding-left: 1.1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 1.2rem;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 520px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  .layout {
+    gap: 1rem;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .controls {
+    display: flex;
+  }
+
+  .hud {
+    gap: 0.5rem;
+  }
+
+  .hud-panel {
+    flex: 1;
+    min-width: unset;
+  }
+}
