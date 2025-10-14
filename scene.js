@@ -11,8 +11,9 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050812);
-scene.fog = new THREE.Fog(0x050812, 26, 140);
+const daySkyColor = 0x87ceeb;
+scene.background = new THREE.Color(daySkyColor);
+scene.fog = new THREE.Fog(daySkyColor, 80, 220);
 
 const camera = new THREE.PerspectiveCamera(
   60,
@@ -24,10 +25,10 @@ camera.position.set(0, 4.5, 8.4);
 camera.lookAt(0, 1.6, -20);
 scene.add(camera);
 
-const hemiLight = new THREE.HemisphereLight(0x95c8ff, 0x0b0d16, 0.85);
+const hemiLight = new THREE.HemisphereLight(0xdff1ff, 0xf6e6d2, 0.95);
 scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
 dirLight.position.set(-12, 18, 6);
 scene.add(dirLight);
 
