@@ -6,6 +6,7 @@ import {
   PLAYER_ACCEL_RATE,
   PLAYER_BASE_Y,
   PLAYER_MAX_SPEED,
+  PLAYER_TARGET_BASE_SPEED,
 } from "./constants.js";
 import { createCarBody } from "./entities.js";
 
@@ -52,7 +53,7 @@ export function updatePlayer(state, delta) {
   );
   state.player.targetSpeed = Math.min(
     PLAYER_MAX_SPEED,
-    24 + state.score * 0.015
+    PLAYER_TARGET_BASE_SPEED + state.score * 0.015
   );
   state.player.speed +=
     (state.player.targetSpeed - state.player.speed) *

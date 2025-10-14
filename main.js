@@ -4,6 +4,8 @@ import {
   PLAYER_BASE_Y,
   STORAGE_KEY,
   BEAR_SPAWN_BASE_INTERVAL,
+  PLAYER_START_SPEED,
+  PLAYER_START_TARGET_SPEED,
 } from "./constants.js";
 import {
   renderer,
@@ -42,11 +44,13 @@ import {
   showOverlay,
   hideOverlay,
   startButton,
+  initializeUiText,
 } from "./ui.js";
 import {
   bindKeyboardControls,
   bindTouchControls,
 } from "./controls.js";
+import { STRINGS } from "./strings.js";
 
 const playerCar = createPlayerCar();
 scene.add(playerCar);
@@ -57,8 +61,8 @@ const state = {
     mesh: playerCar,
     laneIndex: 1,
     targetX: LANES[1],
-    speed: 20,
-    targetSpeed: 20,
+    speed: PLAYER_START_SPEED,
+    targetSpeed: PLAYER_START_TARGET_SPEED,
     jump: {
       active: false,
       velocity: 0,
@@ -82,10 +86,12 @@ createCityScenery();
 resizeRenderer();
 updateHud(state);
 
+initializeUiText(STRINGS);
+
 showOverlay({
   title: "Street Sprint 3D",
-  body: "矢印キー�E��E →）また�E A / D で車線変更。スペ�Eスキー�E�モバイルは⤴�E��Eタン�E�でジャンプして送E��おじさんカーを飛�E越え、ハイスコアを狙ぁE��しょぁE��E",
-  buttonLabel: "スターチE",
+  body: STRINGS.introBody,
+  buttonLabel: STRINGS.startButton,
 });
 
 window.addEventListener("resize", resizeRenderer);
@@ -101,8 +107,8 @@ function resetGame() {
   state.player.mesh.position.set(LANES[1], PLAYER_BASE_Y, 0);
   state.player.mesh.rotation.set(0, 0, 0);
   state.player.mesh.position.y = PLAYER_BASE_Y;
-  state.player.speed = 20;
-  state.player.targetSpeed = 22;
+  state.player.speed = PLAYER_START_SPEED;
+  state.player.targetSpeed = PLAYER_START_TARGET_SPEED;
   state.player.jump.active = false;
   state.player.jump.velocity = 0;
   state.player.jumpCooldown = 0;
@@ -138,19 +144,21 @@ function endGame() {
     return;
   }
   state.gameState = GAME_STATE.GAME_OVER;
-  let bodyText = `スコア: ${Math.floor(state.score)}\nもう一度挑戦しますか�E�`;
+  let bodyText = `${STRINGS.scorePrefix}: ${Math.floor(
+    state.score
+  )}\n${STRINGS.gameOverPromptSuffix}`;
 
   if (state.score > state.best) {
     state.best = Math.floor(state.score);
     localStorage.setItem(STORAGE_KEY, state.best);
     updateHud(state);
-    bodyText += "\n最高スコア更新�E�E";
+    bodyText += `\n${STRINGS.highScoreUpdate}`;
   }
 
   showOverlay({
     title: "Game Over",
     body: bodyText,
-    buttonLabel: "リトライ",
+    buttonLabel: STRINGS.retryButton,
   });
 }
 
@@ -173,14 +181,13 @@ function update(delta) {
   updateScenery(delta, state.player);
   updateLaneMarkers(delta, state.player);
   updateEnemies(state, delta, endGame);
+  updateBears(state, delta);
+  updateScorePopups(state, delta);
+  updateDebrisPieces(state, delta);
 
   if (state.gameState !== GAME_STATE.RUNNING) {
     return;
   }
-
-  updateBears(state, delta);
-  updateScorePopups(state, delta);
-  updateDebrisPieces(state, delta);
 
   updateScore(delta);
 

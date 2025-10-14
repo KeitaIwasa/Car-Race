@@ -11,41 +11,33 @@
     <section class="game-shell">
       <header class="hud">
         <div class="hud-panel">
-          <span class="label">スコア</span>
+          <span class="label" data-i18n="score-label"></span>
           <span id="score" class="value">0</span>
         </div>
         <div class="hud-panel">
-          <span class="label">最高スコア</span>
+          <span class="label" data-i18n="best-label"></span>
           <span id="best" class="value">0</span>
         </div>
         <div class="hud-panel">
-          <span class="label">速度</span>
+          <span class="label" data-i18n="speed-label"></span>
           <span id="speed" class="value">0 km/h</span>
         </div>
       </header>
-      <canvas id="game" width="360" height="640" aria-label="カーゲーム"></canvas>
+      <canvas id="game" width="360" height="640" aria-label="Street racing game"></canvas>
       <div id="overlay" class="overlay hidden" role="dialog" aria-live="polite">
-        <h1 id="overlay-title">Street Sprint</h1>
-        <p id="overlay-body">矢印キー（← →）または A / D で車線変更。スペースキー（モバイルは⤴︎ボタン）でジャンプして逆走おじさんカーを飛び越え、ハイスコアを狙いましょう！</p>
-        <button id="start-button" type="button" class="btn">スタート</button>
+        <h1 id="overlay-title"></h1>
+        <p id="overlay-body"></p>
+        <button id="start-button" type="button" class="btn"></button>
       </div>
       <footer class="controls">
-        <button id="left-touch" class="btn touch-btn">◀︎</button>
-        <button id="jump-touch" class="btn touch-btn jump-btn" aria-label="ジャンプ">⤴︎</button>
-        <button id="right-touch" class="btn touch-btn">▶︎</button>
+        <button id="left-touch" class="btn touch-btn">&#x25C0;</button>
+        <button id="jump-touch" class="btn touch-btn jump-btn" aria-label="Jump">&#x2934;</button>
+        <button id="right-touch" class="btn touch-btn">&#x25B6;</button>
       </footer>
     </section>
     <aside class="sidebar">
-      <h2>遊び方</h2>
-      <ul>
-        <li>矢印キー（← →）または A / D で車線変更。</li>
-        <li>スペースキーでジャンプ。車を飛び越えてボーナスを狙いましょう。</li>
-        <li>スマホなら画面下の◀︎ ▶︎と⤴︎で車線変更とジャンプができます。</li>
-        <li>時々逆走してくる「おじさんカー」が出現！ヘッドライトとひげ面に注意。</li>
-        <li>同じ車線でジャンプして飛び越えると大きなボーナスが入ります。</li>
-        <li>最高スコアは自動で保存されます。</li>
-        <li>速度は時間とともに上昇します。冷静な車線変更で連続ジャンプを狙いましょう。</li>
-      </ul>
+      <h2 id="howto-heading"></h2>
+      <ul id="howto-list"></ul>
     </aside>
   </main>
   <script src="main.js" type="module"></script>

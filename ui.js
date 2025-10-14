@@ -9,6 +9,11 @@ const speedEl = document.getElementById("speed");
 const touchLeft = document.getElementById("left-touch");
 const touchRight = document.getElementById("right-touch");
 const touchJump = document.getElementById("jump-touch");
+const scoreLabelEl = document.querySelector('[data-i18n="score-label"]');
+const bestLabelEl = document.querySelector('[data-i18n="best-label"]');
+const speedLabelEl = document.querySelector('[data-i18n="speed-label"]');
+const howtoHeading = document.getElementById("howto-heading");
+const howtoList = document.getElementById("howto-list");
 
 export {
   canvas,
@@ -22,6 +27,8 @@ export {
   touchLeft,
   touchRight,
   touchJump,
+  howtoHeading,
+  howtoList,
 };
 
 export function updateHud(state) {
@@ -39,4 +46,19 @@ export function showOverlay({ title, body, buttonLabel }) {
   overlayBody.textContent = body;
   startButton.textContent = buttonLabel;
   overlay.classList.remove("hidden");
+}
+
+export function initializeUiText(strings) {
+  if (scoreLabelEl) scoreLabelEl.textContent = strings.scoreLabel;
+  if (bestLabelEl) bestLabelEl.textContent = strings.bestLabel;
+  if (speedLabelEl) speedLabelEl.textContent = strings.speedLabel;
+  if (howtoHeading) howtoHeading.textContent = strings.instructionsHeading;
+  if (howtoList) {
+    howtoList.innerHTML = "";
+    strings.instructions.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      howtoList.appendChild(li);
+    });
+  }
 }
