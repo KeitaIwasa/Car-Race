@@ -1,0 +1,35 @@
+export const GAME_STATE = {
+  READY: "ready",
+  RUNNING: "running",
+  GAME_OVER: "over",
+};
+
+export const LANES = [-2.6, 0, 2.6];
+export const PLAYER_BASE_Y = 0.42;
+export const MARKER_SPACING = 13;
+export const MARKER_ROWS = 20;
+export const PLAYER_MAX_SPEED = 84;
+export const GRAVITY = 25;
+export const PLAYER_ACCEL_RATE = 1.05;
+
+export const STORAGE_KEY = "street-sprint-best";
+
+export const SCENERY_SEGMENT_LENGTH = 28;
+export const SCENERY_SEGMENT_COUNT = 14;
+export const SCENERY_SCROLL_FACTOR = 0.62;
+export const SCENERY_RESET_Z = 48;
+export const SCENERY_LOOP_LENGTH =
+  SCENERY_SEGMENT_LENGTH * SCENERY_SEGMENT_COUNT;
+
+export const BEAR_SPAWN_BASE_INTERVAL = 6.5;
+export const BEAR_SCORE_REWARD = 260;
+export const BEAR_DESPAWN_Z = 28;
+
+export const ENEMY_PALETTE = [
+  0x4361ee,
+  0x4895ef,
+  0x4cc9f0,
+  0xff006e,
+  0xff924c,
+  0xb5179e,
+];
