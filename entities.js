@@ -1,5 +1,8 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
+const toyotaTextureLoader = new THREE.TextureLoader();
+let toyotaTexture;
+
 export function createPassenger() {
   const group = new THREE.Group();
 
@@ -60,6 +63,26 @@ export function createPassenger() {
   return group;
 }
 
+function createToyotaEmblem() {
+  if (!toyotaTexture) {
+    toyotaTexture = toyotaTextureLoader.load("icons8-トヨタ-48.png");
+    toyotaTexture.colorSpace = THREE.SRGBColorSpace;
+    toyotaTexture.generateMipmaps = true;
+  }
+
+  const material = new THREE.MeshBasicMaterial({
+    map: toyotaTexture,
+    transparent: true,
+    color: 0xffffff,
+    alphaTest: 0.15,
+  });
+
+  const emblem = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.48), material);
+  emblem.renderOrder = 3;
+
+  return emblem;
+}
+
 export function createCarBody(color, options = {}) {
   const { facingBackward = false, passenger } = options;
   const group = new THREE.Group();
@@ -113,6 +136,11 @@ export function createCarBody(color, options = {}) {
   );
   rearLight.position.set(0, 0.38, -1.35);
   group.add(rearLight);
+
+  const emblem = createToyotaEmblem();
+  emblem.position.set(0, 0.71, 1.36);
+  group.add(emblem);
+  group.userData.emblem = emblem;
 
   const spoiler = new THREE.Mesh(
     new THREE.BoxGeometry(1.2, 0.12, 0.5),
