@@ -12,7 +12,7 @@ export const GRAVITY = 29;
 export const PLAYER_ACCEL_RATE = 1.005;
 export const PLAYER_START_SPEED = 60;
 export const PLAYER_START_TARGET_SPEED = 60;
-export const PLAYER_SPEED_LOG_FACTOR = 40;
+export const PLAYER_SPEED_LOG_FACTOR = 50;
 
 export const STORAGE_KEY = "street-sprint-best";
 

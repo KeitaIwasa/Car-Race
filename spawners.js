@@ -255,8 +255,8 @@ export function updateBears(state, delta, onGameOver) {
     mesh.position.y = baseY + Math.sin(bear.bobPhase) * 0.06;
     mesh.position.z += state.player.speed * delta;
 
-    const raiseStartZ = -9;
-    const raiseFullZ = -2.2;
+    const raiseStartZ = -90;
+    const raiseFullZ = -70;
     const targetRaise =
       bear.collided || mesh.position.z >= raiseFullZ
         ? 1
@@ -266,9 +266,13 @@ export function updateBears(state, delta, onGameOver) {
             1
           );
     const previousRaise = bear.armRaiseProgress ?? 0;
-    const newRaise = THREE.MathUtils.damp
-      ? THREE.MathUtils.damp(previousRaise, targetRaise, 0.4, delta)
-      : THREE.MathUtils.lerp(previousRaise, targetRaise, delta * 4.6);
+    const blend = Math.min(1, delta * 6.8);
+    const lerpFn = THREE.MathUtils.lerp ?? ((a, b, t) => a + (b - a) * t);
+    const rawRaise = previousRaise + (targetRaise - previousRaise) * blend;
+    const clamp01 = THREE.MathUtils.clamp ?? ((v, min, max) =>
+      Math.max(min, Math.min(max, v))
+    );
+    const newRaise = clamp01(rawRaise, 0, 1);
     bear.armRaiseProgress = newRaise;
     mesh.userData.armRaiseProgress = newRaise;
 
@@ -280,9 +284,8 @@ export function updateBears(state, delta, onGameOver) {
         if (!rest || !raised) {
           continue;
         }
-        const mix = THREE.MathUtils.lerp ?? ((a, b, t) => a + (b - a) * t);
-        const x = mix(rest.x, raised.x, newRaise);
-        const z = mix(rest.z, raised.z, newRaise);
+        const x = lerpFn(rest.x, raised.x, newRaise);
+        const z = lerpFn(rest.z, raised.z, newRaise);
         pivot.rotation.set(x, 0, z);
       }
     }

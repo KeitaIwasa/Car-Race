@@ -273,7 +273,7 @@ export function createBear() {
     const restRotZ = x < 0 ? 0.18 : -0.18;
     armPivot.rotation.set(restRotX, 0, restRotZ);
     armPivot.userData.restRotation = { x: restRotX, z: restRotZ };
-    armPivot.userData.raiseRotation = { x: 1.3, z: restRotZ * 0.45 };
+    armPivot.userData.raiseRotation = { x: -2.8, z: restRotZ * 1.5 };
     group.add(armPivot);
     armPivots.push(armPivot);
 
