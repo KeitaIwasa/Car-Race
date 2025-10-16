@@ -44,6 +44,9 @@ scene.add(wildlifeGroup);
 const effectsGroup = new THREE.Group();
 scene.add(effectsGroup);
 
+const collectiblesGroup = new THREE.Group();
+scene.add(collectiblesGroup);
+
 function createGround() {
   const groundGeometry = new THREE.PlaneGeometry(24, 320, 1, 1);
   const groundMaterial = new THREE.MeshStandardMaterial({
@@ -167,4 +170,5 @@ export {
   sceneryGroup,
   wildlifeGroup,
   effectsGroup,
+  collectiblesGroup,
 };

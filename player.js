@@ -8,6 +8,7 @@ import {
   PLAYER_SPEED_LOG_FACTOR,
 } from "./constants.js";
 import { createCarBody } from "./entities.js";
+import { updateSpeedometer } from "./ui.js";
 
 export function createPlayerCar() {
   const mesh = createCarBody(0xffc200);
@@ -55,6 +56,7 @@ export function updatePlayer(state, delta) {
   state.player.speed +=
     (state.player.targetSpeed - state.player.speed) *
     Math.min(1, delta * PLAYER_ACCEL_RATE);
+  updateSpeedometer(state);
 
   const smoothing = Math.min(1, delta * 10);
   const desiredX = state.player.targetX;

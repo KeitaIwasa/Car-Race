@@ -6,6 +6,9 @@ import {
   BEAR_SPAWN_BASE_INTERVAL,
   PLAYER_START_SPEED,
   PLAYER_START_TARGET_SPEED,
+  WRONG_WAY_SPAWN_INTERVAL,
+  COIN_SPAWN_MIN_INTERVAL,
+  COIN_SPAWN_MAX_INTERVAL,
 } from "./constants.js";
 import {
   renderer,
@@ -34,6 +37,11 @@ import {
   updateEnemies,
   updateBears,
 } from "./spawners.js";
+import {
+  spawnCoin,
+  clearCoins,
+  updateCoins,
+} from "./collectibles.js";
 import {
   updateScorePopups,
   updateDebrisPieces,
@@ -71,17 +79,31 @@ const state = {
   },
   enemies: [],
   bears: [],
+  coins: [],
   scorePopups: [],
   debrisPieces: [],
   spawnTimer: 0,
   spawnInterval: 1.4,
   bearTimer: 0,
   bearInterval: BEAR_SPAWN_BASE_INTERVAL,
+  wrongWayTimer: WRONG_WAY_SPAWN_INTERVAL,
   score: 0,
   elapsedTime: 0,
   best: Number(localStorage.getItem(STORAGE_KEY)) || 0,
   lastTime: performance.now(),
+  coinTimer: 0,
+  nextCoinInterval: 0,
 };
+
+function rollCoinInterval() {
+  return (
+    COIN_SPAWN_MIN_INTERVAL +
+    Math.random() *
+      (COIN_SPAWN_MAX_INTERVAL - COIN_SPAWN_MIN_INTERVAL)
+  );
+}
+
+state.nextCoinInterval = rollCoinInterval();
 
 createCityScenery();
 resizeRenderer();
@@ -90,17 +112,12 @@ updateHud(state);
 initializeUiText(STRINGS);
 
 showOverlay({
-  title: "Street Sprint 3D",
+  title: "Street Sprint 3D by 藤井太田研",
   body: STRINGS.introBody,
   buttonLabel: STRINGS.startButton,
 });
 
 window.addEventListener("resize", resizeRenderer);
-
-function updateScore(delta) {
-  state.score += state.player.speed * delta * 4.5;
-  updateHud(state);
-}
 
 function resetGame() {
   state.player.laneIndex = 1;
@@ -118,12 +135,16 @@ function resetGame() {
   state.spawnInterval = 1.4;
   state.bearTimer = 0;
   state.bearInterval = BEAR_SPAWN_BASE_INTERVAL;
+  state.wrongWayTimer = WRONG_WAY_SPAWN_INTERVAL;
   state.score = 0;
   state.elapsedTime = 0;
   state.lastTime = performance.now();
+  state.coinTimer = 0;
+  state.nextCoinInterval = rollCoinInterval();
 
   clearEnemies(state);
   clearBears(state);
+  clearCoins(state);
   clearEffects(state);
   resetLaneMarkers();
   resetScenery();
@@ -192,9 +213,18 @@ function update(delta) {
     return;
   }
 
-  updateScore(delta);
+  updateCoins(state, delta);
+
+  state.coinTimer += delta;
+  if (state.coinTimer >= state.nextCoinInterval) {
+    const spawned = spawnCoin(state);
+    const nextInterval = rollCoinInterval();
+    state.nextCoinInterval = nextInterval;
+    state.coinTimer = spawned ? 0 : nextInterval * 0.6;
+  }
 
   state.spawnTimer += delta;
+  state.wrongWayTimer += delta;
   const adaptiveInterval = Math.max(
     0.65,
     state.spawnInterval - state.score * 0.0007

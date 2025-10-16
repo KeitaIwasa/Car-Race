@@ -26,6 +26,9 @@ export const SCENERY_LOOP_LENGTH =
 export const BEAR_SPAWN_BASE_INTERVAL = 12;
 export const BEAR_DESPAWN_Z = 28;
 
+export const WRONG_WAY_SPAWN_INTERVAL = 10;
+export const POLICE_DESIRED_GAP = 35;
+
 export const ENEMY_PALETTE = [
   0x4361ee,
   0x4895ef,
@@ -35,4 +38,7 @@ export const ENEMY_PALETTE = [
   0xb5179e,
 ];
 
-export const POLICE_DESIRED_GAP = 35;
+export const COIN_SCORE_VALUE = 150;
+export const COIN_SPAWN_MIN_INTERVAL = 1.8;
+export const COIN_SPAWN_MAX_INTERVAL = 4.5;
+export const COIN_MAX_ACTIVE = 3;

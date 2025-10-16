@@ -7,12 +7,14 @@ import {
   LANES,
   PLAYER_BASE_Y,
   POLICE_DESIRED_GAP,
+  WRONG_WAY_SPAWN_INTERVAL,
 } from "./constants.js";
 import { createCarBody, createPassenger, createBear, createPoliceCar } from "./entities.js";
 
 export function spawnEnemy(state) {
   const lane = Math.floor(Math.random() * LANES.length);
-  const allowWrongWay = state.score > 320;
+  const allowWrongWay =
+    state.score > 320 && state.wrongWayTimer >= WRONG_WAY_SPAWN_INTERVAL;
   const wrongWayChance = allowWrongWay ? 0.22 : 0.1;
   const isWrongWay =
     Math.random() < wrongWayChance && allowWrongWay;
@@ -56,6 +58,9 @@ export function spawnEnemy(state) {
     passed: false,
   };
   state.enemies.push(enemyObj);
+  if (isWrongWay) {
+    state.wrongWayTimer = 0;
+  }
 
   // 逆走車の後ろを 1/4 の確率で警察が追尾
   if (isWrongWay && Math.random() < 0.25) {
@@ -99,6 +104,7 @@ export function spawnBear(state) {
     laneIndex: lane,
     bobPhase: Math.random() * Math.PI * 2,
     collided: false,
+    armRaiseProgress: 0,
   });
 }
 
@@ -191,18 +197,6 @@ export function updateEnemies(state, delta, onGameOver) {
 
     if (!enemy.passed && zPos > 1.5) {
       enemy.passed = true;
-      const sameLane = Math.abs(
-        enemy.mesh.position.x - state.player.mesh.position.x
-      ) < 1.6;
-      const airborne =
-        state.player.mesh.position.y > PLAYER_BASE_Y + 0.22;
-      let reward = enemy.direction === -1 ? 160 : 80;
-      if (sameLane && airborne) {
-        reward += enemy.direction === -1 ? 200 : 90;
-      } else if (sameLane && !airborne) {
-        reward -= 30;
-      }
-      state.score += Math.max(20, reward);
     }
 
     if (zPos > 24) {
@@ -260,6 +254,38 @@ export function updateBears(state, delta, onGameOver) {
     const baseY = mesh.userData.baseY ?? 0.2;
     mesh.position.y = baseY + Math.sin(bear.bobPhase) * 0.06;
     mesh.position.z += state.player.speed * delta;
+
+    const raiseStartZ = -9;
+    const raiseFullZ = -2.2;
+    const targetRaise =
+      bear.collided || mesh.position.z >= raiseFullZ
+        ? 1
+        : THREE.MathUtils.clamp(
+            (mesh.position.z - raiseStartZ) / (raiseFullZ - raiseStartZ),
+            0,
+            1
+          );
+    const previousRaise = bear.armRaiseProgress ?? 0;
+    const newRaise = THREE.MathUtils.damp
+      ? THREE.MathUtils.damp(previousRaise, targetRaise, 0.4, delta)
+      : THREE.MathUtils.lerp(previousRaise, targetRaise, delta * 4.6);
+    bear.armRaiseProgress = newRaise;
+    mesh.userData.armRaiseProgress = newRaise;
+
+    const armPivots = mesh.userData.armPivots;
+    if (Array.isArray(armPivots)) {
+      for (const pivot of armPivots) {
+        const rest = pivot.userData.restRotation;
+        const raised = pivot.userData.raiseRotation;
+        if (!rest || !raised) {
+          continue;
+        }
+        const mix = THREE.MathUtils.lerp ?? ((a, b, t) => a + (b - a) * t);
+        const x = mix(rest.x, raised.x, newRaise);
+        const z = mix(rest.z, raised.z, newRaise);
+        pivot.rotation.set(x, 0, z);
+      }
+    }
 
     const dx = Math.abs(mesh.position.x - state.player.mesh.position.x);
     const zPos = mesh.position.z;

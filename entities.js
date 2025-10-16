@@ -205,6 +205,24 @@ export function createBear() {
   nose.position.set(0, 2.12, 1.05);
   group.add(nose);
 
+  const eyeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x4f0a0a,
+    emissive: 0xff3636,
+    emissiveIntensity: 1.1,
+    roughness: 0.35,
+    metalness: 0.08,
+  });
+  const eyeGeometry = new THREE.SphereGeometry(0.09, 12, 12);
+  [-0.24, 0.24].forEach((x) => {
+    const eye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    eye.position.set(x, 2.28, 0.74);
+    group.add(eye);
+
+    const glow = new THREE.PointLight(0xff3c3c, 0.9, 5.5, 2.2);
+    glow.position.set(0, 0, 0.04);
+    eye.add(glow);
+  });
+
   const earGeometry = new THREE.BoxGeometry(0.32, 0.26, 0.18);
   const innerEarMaterial = new THREE.MeshStandardMaterial({
     color: 0xe3c4ab,
@@ -245,21 +263,33 @@ export function createBear() {
     leg.add(foot);
   });
 
-  const armGeometry = new THREE.BoxGeometry(0.36, 1.26, 0.34);
-  [-0.82, 0.82].forEach((x) => {
+  const armGeometry = new THREE.BoxGeometry(0.34, 1.08, 0.38);
+  const armPivots = [];
+  [-0.68, 0.68].forEach((x) => {
+    const armPivot = new THREE.Group();
+    armPivot.position.set(x, 1.78, 0.28);
+    armPivot.rotation.order = "ZYX";
+    const restRotX = -0.22;
+    const restRotZ = x < 0 ? 0.18 : -0.18;
+    armPivot.rotation.set(restRotX, 0, restRotZ);
+    armPivot.userData.restRotation = { x: restRotX, z: restRotZ };
+    armPivot.userData.raiseRotation = { x: 1.3, z: restRotZ * 0.45 };
+    group.add(armPivot);
+    armPivots.push(armPivot);
+
     const arm = new THREE.Mesh(armGeometry, limbMaterial);
-    arm.position.set(x, 1.46, 0.38);
-    arm.rotation.z = x < 0 ? 0.28 : -0.28;
-    arm.rotation.x = -0.18;
-    group.add(arm);
+    arm.position.set(0, -0.54, 0);
+    armPivot.add(arm);
 
     const paw = new THREE.Mesh(
-      new THREE.BoxGeometry(0.4, 0.24, 0.4),
+      new THREE.BoxGeometry(0.42, 0.22, 0.42),
       limbMaterial
     );
-    paw.position.set(0, -0.62, 0.12);
+    paw.position.set(0, -0.64, 0.12);
     arm.add(paw);
   });
+  group.userData.armPivots = armPivots;
+  group.userData.armRaiseProgress = 0;
 
   const brow = new THREE.Mesh(
     new THREE.BoxGeometry(0.74, 0.16, 0.1),
@@ -368,4 +398,89 @@ export function createPoliceCar(options = {}) {
   }
 
   return car;
+}
+
+export function createCoin() {
+  const group = new THREE.Group();
+
+  const faceMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf7d64a,
+    emissive: 0xe2b52a,
+    emissiveIntensity: 0.36,
+    metalness: 0.82,
+    roughness: 0.28,
+  });
+
+  const rimMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffe27a,
+    emissive: 0xf4c545,
+    emissiveIntensity: 0.42,
+    metalness: 0.88,
+    roughness: 0.24,
+  });
+
+  const insetMaterial = new THREE.MeshStandardMaterial({
+    color: 0xfff7b2,
+    emissive: 0xf8dc64,
+    emissiveIntensity: 0.3,
+    metalness: 0.78,
+    roughness: 0.24,
+  });
+
+  const edge = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.5, 0.5, 0.12, 40, 1, true),
+    rimMaterial
+  );
+  edge.rotation.x = Math.PI / 2;
+  group.add(edge);
+
+  const frontFace = new THREE.Mesh(
+    new THREE.CircleGeometry(0.5, 40),
+    faceMaterial
+  );
+  frontFace.position.z = 0.06;
+  group.add(frontFace);
+
+  const backFace = frontFace.clone();
+  backFace.position.z = -0.06;
+  backFace.rotation.y = Math.PI;
+  group.add(backFace);
+
+  const frontRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.32, 0.48, 40),
+    new THREE.MeshStandardMaterial({
+      color: 0xffec94,
+      emissive: 0xf7cf54,
+      emissiveIntensity: 0.4,
+      metalness: 0.85,
+      roughness: 0.22,
+      side: THREE.DoubleSide,
+    })
+  );
+  frontRing.position.z = 0.061;
+  group.add(frontRing);
+
+  const backRing = frontRing.clone();
+  backRing.position.z = -0.061;
+  backRing.rotation.y = Math.PI;
+  group.add(backRing);
+
+  const frontInset = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.58, 0.02),
+    insetMaterial
+  );
+  frontInset.position.z = 0.062;
+  group.add(frontInset);
+
+  const backInset = frontInset.clone();
+  backInset.position.z = -0.062;
+  backInset.rotation.y = Math.PI;
+  group.add(backInset);
+
+  group.scale.setScalar(0.95);
+  group.userData.spinSpeed = 6.2;
+  group.userData.baseY = 0.76;
+  group.position.y = group.userData.baseY;
+
+  return group;
 }

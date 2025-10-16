@@ -15,6 +15,10 @@ const speedLabelEl = document.querySelector('[data-i18n="speed-label"]');
 const howtoHeading = document.getElementById("howto-heading");
 const howtoList = document.getElementById("howto-list");
 
+let lastScoreText = null;
+let lastBestText = null;
+let lastSpeedValue = null;
+
 export {
   canvas,
   overlay,
@@ -32,9 +36,37 @@ export {
 };
 
 export function updateHud(state) {
-  scoreEl.textContent = Math.floor(state.score).toString();
-  bestEl.textContent = state.best.toString();
-  speedEl.textContent = `${Math.round(state.player.speed * 3.2)} km/h`;
+  if (!state) {
+    return;
+  }
+
+  const nextScoreText = Math.floor(state.score).toString();
+  if (scoreEl && nextScoreText !== lastScoreText) {
+    scoreEl.textContent = nextScoreText;
+    lastScoreText = nextScoreText;
+  }
+
+  const nextBestText = state.best.toString();
+  if (bestEl && nextBestText !== lastBestText) {
+    bestEl.textContent = nextBestText;
+    lastBestText = nextBestText;
+  }
+
+  updateSpeedometer(state);
+}
+
+export function updateSpeedometer(state) {
+  if (!state?.player || !speedEl) {
+    return;
+  }
+
+  const nextSpeedValue = Math.round(state.player.speed * 3.2);
+  if (nextSpeedValue === lastSpeedValue) {
+    return;
+  }
+
+  lastSpeedValue = nextSpeedValue;
+  speedEl.textContent = `${nextSpeedValue} km/h`;
 }
 
 export function hideOverlay() {
