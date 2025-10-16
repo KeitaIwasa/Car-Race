@@ -39,6 +39,6 @@ export const ENEMY_PALETTE = [
 ];
 
 export const COIN_SCORE_VALUE = 150;
-export const COIN_SPAWN_MIN_INTERVAL = 1.8;
-export const COIN_SPAWN_MAX_INTERVAL = 4.5;
+export const COIN_SPAWN_MIN_INTERVAL = 0.5;
+export const COIN_SPAWN_MAX_INTERVAL = 3;
 export const COIN_MAX_ACTIVE = 3;
