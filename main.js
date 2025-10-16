@@ -78,6 +78,7 @@ const state = {
   bearTimer: 0,
   bearInterval: BEAR_SPAWN_BASE_INTERVAL,
   score: 0,
+  elapsedTime: 0,
   best: Number(localStorage.getItem(STORAGE_KEY)) || 0,
   lastTime: performance.now(),
 };
@@ -118,6 +119,7 @@ function resetGame() {
   state.bearTimer = 0;
   state.bearInterval = BEAR_SPAWN_BASE_INTERVAL;
   state.score = 0;
+  state.elapsedTime = 0;
   state.lastTime = performance.now();
 
   clearEnemies(state);
@@ -177,11 +179,12 @@ function handleStart() {
 }
 
 function update(delta) {
+  state.elapsedTime += delta;
   updatePlayer(state, delta);
   updateScenery(delta, state.player);
   updateLaneMarkers(delta, state.player);
   updateEnemies(state, delta, endGame);
-  updateBears(state, delta);
+  updateBears(state, delta, endGame);
   updateScorePopups(state, delta);
   updateDebrisPieces(state, delta);
 

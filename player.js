@@ -5,8 +5,7 @@ import {
   LANES,
   PLAYER_ACCEL_RATE,
   PLAYER_BASE_Y,
-  PLAYER_MAX_SPEED,
-  PLAYER_TARGET_BASE_SPEED,
+  PLAYER_SPEED_LOG_FACTOR,
 } from "./constants.js";
 import { createCarBody } from "./entities.js";
 
@@ -51,10 +50,8 @@ export function updatePlayer(state, delta) {
     0,
     state.player.jumpCooldown - delta
   );
-  state.player.targetSpeed = Math.min(
-    PLAYER_MAX_SPEED,
-    PLAYER_TARGET_BASE_SPEED + state.score * 0.015
-  );
+  const elapsed = Math.max(0, state.elapsedTime || 0);
+  state.player.targetSpeed = Math.log10(elapsed + 1) * PLAYER_SPEED_LOG_FACTOR + 20;
   state.player.speed +=
     (state.player.targetSpeed - state.player.speed) *
     Math.min(1, delta * PLAYER_ACCEL_RATE);

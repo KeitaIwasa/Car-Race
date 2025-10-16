@@ -3,14 +3,12 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 import { scene, wildlifeGroup } from "./scene.js";
 import {
   BEAR_DESPAWN_Z,
-  BEAR_SCORE_REWARD,
   ENEMY_PALETTE,
   LANES,
   PLAYER_BASE_Y,
+  POLICE_DESIRED_GAP,
 } from "./constants.js";
-import { createCarBody, createPassenger, createBear } from "./entities.js";
-import { createScorePopup, spawnBearDebris } from "./effects.js";
-import { updateHud } from "./ui.js";
+import { createCarBody, createPassenger, createBear, createPoliceCar } from "./entities.js";
 
 export function spawnEnemy(state) {
   const lane = Math.floor(Math.random() * LANES.length);
@@ -49,13 +47,20 @@ export function spawnEnemy(state) {
 
   const forwardSpeed = 12 + Math.random() * 6;
   const wrongWaySpeed = 26 + Math.random() * 6;
-  state.enemies.push({
+
+  const enemyObj = {
     mesh,
     laneIndex: lane,
     direction: isWrongWay ? -1 : 1,
     speed: isWrongWay ? wrongWaySpeed : forwardSpeed,
     passed: false,
-  });
+  };
+  state.enemies.push(enemyObj);
+
+  // 逆走車の後ろを 1/4 の確率で警察が追尾
+  if (isWrongWay && Math.random() < 0.25) {
+    spawnPoliceChaser(state, enemyObj);
+  }
 }
 
 export function spawnBear(state) {
@@ -93,7 +98,7 @@ export function spawnBear(state) {
     mesh,
     laneIndex: lane,
     bobPhase: Math.random() * Math.PI * 2,
-    collected: false,
+    collided: false,
   });
 }
 
@@ -119,6 +124,55 @@ export function updateEnemies(state, delta, onGameOver) {
         ? state.player.speed + enemy.speed
         : state.player.speed - enemy.speed;
     enemy.mesh.position.z += relativeSpeed * delta;
+
+    // Police siren blink and chase behavior
+    if (enemy.isPolice) {
+      // Siren animation
+      enemy.sirenTimer = (enemy.sirenTimer || 0) + delta;
+      const cycle = 0.18; // seconds per half-blink
+      const phase = Math.floor((enemy.sirenTimer % (cycle * 2)) / cycle);
+      const mats = enemy.mesh.userData.sirenMaterials;
+      const lights = enemy.mesh.userData.sirenLights;
+      if (mats && mats.length === 2) {
+        const onIntensity = 0.9;
+        const offIntensity = 0.12;
+        if (phase === 0) {
+          mats[0].emissiveIntensity = onIntensity;
+          mats[1].emissiveIntensity = offIntensity;
+        } else {
+          mats[0].emissiveIntensity = offIntensity;
+          mats[1].emissiveIntensity = onIntensity;
+        }
+      }
+      if (lights && lights.length === 2) {
+        const on = phase === 0 ? [1.0, 0.0] : [0.0, 1.0];
+        lights[0].intensity = on[0] * 1.2;
+        lights[1].intensity = on[1] * 1.2;
+      }
+
+      // Chase target if present
+      if (enemy.chaseTarget && state.enemies.indexOf(enemy.chaseTarget) !== -1) {
+        const target = enemy.chaseTarget;
+        const gap = target.mesh.position.z - enemy.mesh.position.z; // positive if police behind
+        const desired = POLICE_DESIRED_GAP; // desired gap distance
+        const maxBoost = 6.5;
+        const base = enemy.baseSpeed || enemy.speed;
+        if (gap > desired + 2) {
+          enemy.speed = Math.min(base + maxBoost, target.speed + 3.2);
+        } else if (gap < desired - 1.2) {
+          enemy.speed = Math.max(16, target.speed * 0.86);
+        } else {
+          enemy.speed = Math.max(16, target.speed * 0.98);
+        }
+        // keep lane aligned with target
+        enemy.laneIndex = target.laneIndex;
+        enemy.mesh.position.x += (target.mesh.position.x - enemy.mesh.position.x) * 0.28;
+      } else if (enemy.chaseTarget) {
+        // Target disappeared; stop chasing but keep moving wrong-way at base speed
+        enemy.chaseTarget = null;
+        enemy.speed = enemy.baseSpeed || enemy.speed;
+      }
+    }
 
     const dx = Math.abs(
       enemy.mesh.position.x - state.player.mesh.position.x
@@ -164,7 +218,39 @@ export function updateEnemies(state, delta, onGameOver) {
   }
 }
 
-export function updateBears(state, delta) {
+function spawnPoliceChaser(state, targetEnemy) {
+  const lane = targetEnemy.laneIndex;
+  // Try to place the police car a bit behind the target, avoiding tight overlaps
+  let spawnZ = targetEnemy.mesh.position.z - (POLICE_DESIRED_GAP + 2 + Math.random() * 3);
+  // Make a quick attempt to avoid crowding same-lane cars (excluding the target)
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const conflict = state.enemies.some(
+      (e) => e !== targetEnemy && e.laneIndex === lane && Math.abs(e.mesh.position.z - spawnZ) < 6
+    );
+    if (!conflict) break;
+    spawnZ -= 6 + Math.random() * 4;
+  }
+
+  const mesh = createPoliceCar({ facingBackward: true });
+  mesh.position.set(LANES[lane], PLAYER_BASE_Y, spawnZ);
+  scene.add(mesh);
+
+  const baseSpeed = Math.max(22, targetEnemy.speed * (1.02 + Math.random() * 0.08));
+  const police = {
+    mesh,
+    laneIndex: lane,
+    direction: -1,
+    speed: baseSpeed,
+    baseSpeed,
+    passed: false,
+    isPolice: true,
+    chaseTarget: targetEnemy,
+    sirenTimer: 0,
+  };
+  state.enemies.push(police);
+}
+
+export function updateBears(state, delta, onGameOver) {
   for (let i = state.bears.length - 1; i >= 0; i -= 1) {
     const bear = state.bears[i];
     const mesh = bear.mesh;
@@ -178,21 +264,14 @@ export function updateBears(state, delta) {
     const dx = Math.abs(mesh.position.x - state.player.mesh.position.x);
     const zPos = mesh.position.z;
 
-    const contactWindow =
-      zPos > -1.8 &&
-      zPos < 2.6 &&
-      state.player.mesh.position.y <= PLAYER_BASE_Y + 0.32;
+    const contactWindow = zPos > -1.8 && zPos < 2.6;
 
-    if (!bear.collected && dx < 1.2 && contactWindow) {
-      bear.collected = true;
-      const impactPosition = mesh.position.clone();
-      state.score += BEAR_SCORE_REWARD;
-      updateHud(state);
-      createScorePopup(BEAR_SCORE_REWARD, impactPosition, state);
-      spawnBearDebris(impactPosition, state);
-      wildlifeGroup.remove(mesh);
-      state.bears.splice(i, 1);
-      continue;
+    if (!bear.collided && dx < 1.35 && contactWindow) {
+      bear.collided = true;
+      if (typeof onGameOver === "function") {
+        onGameOver();
+      }
+      return;
     }
 
     if (zPos > BEAR_DESPAWN_Z) {

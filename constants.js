@@ -8,12 +8,11 @@ export const LANES = [-2.6, 0, 2.6];
 export const PLAYER_BASE_Y = 0.42;
 export const MARKER_SPACING = 13;
 export const MARKER_ROWS = 20;
-export const PLAYER_MAX_SPEED = 94;
-export const GRAVITY = 25;
+export const GRAVITY = 29;
 export const PLAYER_ACCEL_RATE = 1.005;
-export const PLAYER_START_SPEED = 40;
-export const PLAYER_START_TARGET_SPEED = 30;
-export const PLAYER_TARGET_BASE_SPEED = 30;
+export const PLAYER_START_SPEED = 60;
+export const PLAYER_START_TARGET_SPEED = 60;
+export const PLAYER_SPEED_LOG_FACTOR = 40;
 
 export const STORAGE_KEY = "street-sprint-best";
 
@@ -24,8 +23,7 @@ export const SCENERY_RESET_Z = 48;
 export const SCENERY_LOOP_LENGTH =
   SCENERY_SEGMENT_LENGTH * SCENERY_SEGMENT_COUNT;
 
-export const BEAR_SPAWN_BASE_INTERVAL = 6.5;
-export const BEAR_SCORE_REWARD = 260;
+export const BEAR_SPAWN_BASE_INTERVAL = 12;
 export const BEAR_DESPAWN_Z = 28;
 
 export const ENEMY_PALETTE = [
@@ -36,3 +34,5 @@ export const ENEMY_PALETTE = [
   0xff924c,
   0xb5179e,
 ];
+
+export const POLICE_DESIRED_GAP = 35;
