@@ -12,8 +12,7 @@ body {
   font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   background: radial-gradient(circle at top, #202733 0%, #10141d 60%, #07090f 100%);
   color: #f4f7ff;
-  height: 100vh;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -23,6 +22,7 @@ body {
 
 .layout {
   display: grid;
+  height: 100%;
   gap: 1.5rem;
   grid-template-columns: minmax(320px, 420px) minmax(200px, 280px);
   align-items: start;
