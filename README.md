@@ -62,7 +62,7 @@
 ├─ index.html        # ゲームコンテナと UI 要素の定義、Three.js モジュール読み込み
 ├─ style.css         # レイアウト・HUD・ボタンのスタイリング
 ├─ main.js           # ゲームループ、状態管理、初期化処理
-├─ constants.js      # 物理定数・レーン位置・スコア関連定義
+├─ constants.js      # 定数定義
 ├─ scene.js          # レンダラー / カメラ / ライト / ラインマーカーの制御
 ├─ environment.js    # 背景都市・樹木の生成とスクロール処理
 ├─ entities.js       # 車両、乗客、熊など 3D エンティティの構築
