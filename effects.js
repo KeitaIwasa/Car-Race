@@ -1,5 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
+import { SCORE_POPUP_DURATION } from "./constants.js";
 import { effectsGroup } from "./scene.js";
 
 export function createScorePopup(amount, impactPosition, state) {
@@ -41,7 +42,7 @@ export function createScorePopup(amount, impactPosition, state) {
   state.scorePopups.push({
     mesh: sprite,
     basePosition,
-    duration: 1.2,
+    duration: SCORE_POPUP_DURATION,
     elapsed: 0,
     baseScale,
   });

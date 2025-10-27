@@ -82,7 +82,7 @@ const state = {
   coins: [],
   scorePopups: [],
   debrisPieces: [],
-  spawnTimer: 0,
+  spawnDistance: 0,
   spawnInterval: 1.4,
   bearTimer: 0,
   bearInterval: BEAR_SPAWN_BASE_INTERVAL,
@@ -131,7 +131,7 @@ function resetGame() {
   state.player.jump.velocity = 0;
   state.player.jumpCooldown = 0;
 
-  state.spawnTimer = 0;
+  state.spawnDistance = 0;
   state.spawnInterval = 1.4;
   state.bearTimer = 0;
   state.bearInterval = BEAR_SPAWN_BASE_INTERVAL;
@@ -223,15 +223,20 @@ function update(delta) {
     state.coinTimer = spawned ? 0 : nextInterval * 0.6;
   }
 
-  state.spawnTimer += delta;
+  // 距離ベースで敵車の生成間隔を管理
+  state.spawnDistance += state.player.speed * delta;
   state.wrongWayTimer += delta;
-  const adaptiveInterval = Math.max(
-    0.65,
-    state.spawnInterval - state.score * 0.0007
+  const referenceSpeed = PLAYER_START_SPEED;
+  const baseDistance = state.spawnInterval * referenceSpeed;
+  const minDistance = 0.65 * referenceSpeed;
+  const scoreDistanceFactor = 0.0007 * referenceSpeed;
+  const adaptiveDistance = Math.max(
+    minDistance,
+    baseDistance - state.score * scoreDistanceFactor
   );
-  if (state.spawnTimer > adaptiveInterval) {
+  if (state.spawnDistance > adaptiveDistance) {
     spawnEnemy(state);
-    state.spawnTimer = 0;
+    state.spawnDistance = 0;
   }
 
   state.bearTimer += delta;

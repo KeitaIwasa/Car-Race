@@ -1,1 +1,2 @@
-英語でthinkして、日本語でoutputして
+- 英語でthinkして、日本語でoutputして
+- 定数はconstants.jsで管理

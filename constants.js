@@ -42,3 +42,4 @@ export const COIN_SCORE_VALUE = 150;
 export const COIN_SPAWN_MIN_INTERVAL = 0.5;
 export const COIN_SPAWN_MAX_INTERVAL = 3;
 export const COIN_MAX_ACTIVE = 3;
+export const SCORE_POPUP_DURATION = 0.3;
