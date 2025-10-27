@@ -5,6 +5,7 @@
 :root {
   --safe-area-top: 0px;
   --safe-area-bottom: 0px;
+  --app-viewport-height: 100vh;
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
@@ -16,7 +17,8 @@
 
 html {
   height: 100%;
-  overflow: auto;
+  min-height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -25,24 +27,27 @@ body {
   background: radial-gradient(circle at top, #202733 0%, #10141d 60%, #07090f 100%);
   color: #f4f7ff;
   --body-padding: 2rem;
-  min-height: 100vh;
-  min-height: 100svh;
-  min-height: 100dvh;
-  overflow: auto;
+  height: var(--app-viewport-height);
+  min-height: var(--app-viewport-height);
+  width: 100%;
+  overflow: hidden;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding-inline: var(--body-padding);
   padding-top: calc(var(--body-padding) + var(--safe-area-top));
   padding-bottom: calc(var(--body-padding) + var(--safe-area-bottom));
 }
 
+
 .layout {
   display: grid;
   height: 100%;
+  max-height: 100%;
   gap: 1.5rem;
   grid-template-columns: minmax(320px, 420px) minmax(200px, 280px);
-  align-items: start;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .game-shell {
@@ -52,12 +57,17 @@ body {
   padding: 1rem 1rem calc(0.5rem + var(--safe-area-bottom));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
 }
 
 .hud {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
 .hud-panel {
@@ -87,6 +97,8 @@ body {
   border-radius: 16px;
   background: #090c14;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-inline: auto;
+  flex: 1 1 auto;
 }
 
 .overlay {
@@ -145,6 +157,8 @@ body {
   margin-top: 0.75rem;
   gap: 1rem;
   padding-bottom: var(--safe-area-bottom);
+  flex-shrink: 0;
+  justify-content: center;
 }
 
 .touch-btn {
@@ -175,6 +189,8 @@ body {
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  align-self: stretch;
+  overflow: auto;
 }
 
 .sidebar h2 {

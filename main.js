@@ -59,6 +59,10 @@ import {
   bindTouchControls,
 } from "./controls.js";
 import { STRINGS } from "./strings.js";
+import {
+  initializeViewportLayout,
+  syncViewportLayout,
+} from "./viewport.js";
 
 const playerCar = createPlayerCar();
 scene.add(playerCar);
@@ -106,6 +110,7 @@ function rollCoinInterval() {
 state.nextCoinInterval = rollCoinInterval();
 
 createCityScenery();
+syncViewportLayout();
 resizeRenderer();
 updateHud(state);
 
@@ -117,7 +122,7 @@ showOverlay({
   buttonLabel: STRINGS.startButton,
 });
 
-window.addEventListener("resize", resizeRenderer);
+initializeViewportLayout(resizeRenderer);
 
 function resetGame() {
   state.player.laneIndex = 1;

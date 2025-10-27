@@ -4,6 +4,12 @@
   GAME_OVER: "over",
 };
 
+export const GAME_CANVAS_WIDTH = 360;
+export const GAME_CANVAS_HEIGHT = 640;
+export const GAME_CANVAS_ASPECT =
+  GAME_CANVAS_HEIGHT / GAME_CANVAS_WIDTH;
+export const VIEWPORT_RESIZE_DEBOUNCE_MS = 150;
+
 export const LANES = [-2.6, 0, 2.6];
 export const PLAYER_BASE_Y = 0.42;
 export const MARKER_SPACING = 13;
