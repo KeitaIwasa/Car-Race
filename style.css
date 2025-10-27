@@ -2,9 +2,21 @@
   box-sizing: border-box;
 }
 
+:root {
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  :root {
+    --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 html {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 body {
@@ -12,12 +24,17 @@ body {
   font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   background: radial-gradient(circle at top, #202733 0%, #10141d 60%, #07090f 100%);
   color: #f4f7ff;
-  height: 100svh;
-  overflow: hidden;
+  --body-padding: 2rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding-inline: var(--body-padding);
+  padding-top: calc(var(--body-padding) + var(--safe-area-top));
+  padding-bottom: calc(var(--body-padding) + var(--safe-area-bottom));
 }
 
 .layout {
@@ -32,7 +49,7 @@ body {
   position: relative;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 100%);
   border-radius: 20px;
-  padding: 1rem 1rem 0.5rem;
+  padding: 1rem 1rem calc(0.5rem + var(--safe-area-bottom));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -127,6 +144,7 @@ body {
   display: none;
   margin-top: 0.75rem;
   gap: 1rem;
+  padding-bottom: var(--safe-area-bottom);
 }
 
 .touch-btn {
@@ -171,7 +189,7 @@ body {
 
 @media (max-width: 900px) {
   body {
-    padding: 1.2rem;
+    --body-padding: 1.2rem;
   }
 
   .layout {
@@ -185,7 +203,7 @@ body {
 
 @media (max-width: 520px) {
   body {
-    padding: 0.5rem;
+    --body-padding: 0.5rem;
   }
 
   .layout {

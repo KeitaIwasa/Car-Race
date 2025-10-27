@@ -6,6 +6,14 @@ import {
   SCENERY_LOOP_LENGTH,
   SCENERY_RESET_Z,
   SCENERY_SCROLL_FACTOR,
+  CLOUD_COUNT,
+  CLOUD_LAYER_BASE_Y,
+  CLOUD_LAYER_VARIANCE,
+  CLOUD_SPAWN_RADIUS_X,
+  CLOUD_SCROLL_FACTOR,
+  CLOUD_RESET_Z,
+  CLOUD_LOOP_LENGTH,
+  CLOUD_DRIFT_MAX,
 } from "./constants.js";
 import { sceneryGroup } from "./scene.js";
 
@@ -22,6 +30,114 @@ const buildingPalettes = [
 const treeLeafPalette = [0x047857, 0x059669, 0x0f766e, 0x10b981];
 
 export const scenerySegments = [];
+
+const cloudMeshes = [];
+const cloudGroup = new THREE.Group();
+sceneryGroup.add(cloudGroup);
+
+const cloudBlockGeometry = new THREE.BoxGeometry(1, 1, 1);
+const cloudBlockMaterial = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  emissive: 0xffffff,
+  emissiveIntensity: 0.18,
+  roughness: 0.6,
+  metalness: 0.01,
+  transparent: true,
+  opacity: 0.86,
+});
+
+function createCloud() {
+  const cloud = new THREE.Group();
+  const blockCount = 4 + Math.floor(Math.random() * 4);
+  const baseScale = (0.7 + Math.random() * 0.9) * 8;
+  for (let index = 0; index < blockCount; index += 1) {
+    const block = new THREE.Mesh(cloudBlockGeometry, cloudBlockMaterial);
+    const scaleVariation = 0.6 + Math.random() * 0.8;
+    block.scale.set(
+      baseScale * scaleVariation,
+      baseScale * (0.5 + Math.random() * 0.4),
+      baseScale * (0.7 + Math.random() * 0.6)
+    );
+    const step = 0.4;
+    const offsetX = Math.round(((Math.random() - 0.5) * 3) / step) * step;
+    const offsetY = Math.round(((Math.random() - 0.5) * 0.8) / step) * step;
+    const offsetZ = Math.round(((Math.random() - 0.5) * 1.4) / step) * step;
+    block.position.set(offsetX, offsetY, offsetZ);
+    cloud.add(block);
+  }
+  return cloud;
+}
+
+function seedCloudState(cloud) {
+  cloud.userData = {
+    baseY: CLOUD_LAYER_BASE_Y + Math.random() * CLOUD_LAYER_VARIANCE,
+    floatPhase: Math.random() * Math.PI * 2,
+    floatSpeed: 0.25 + Math.random() * 0.4,
+    floatAmplitude: 0.15 + Math.random() * 0.25,
+    driftX: (Math.random() * 2 - 1) * CLOUD_DRIFT_MAX,
+    scrollFactor: 0.6 + Math.random() * 0.8,
+  };
+}
+
+function resetCloudPosition(cloud, randomizeZ = false) {
+  cloud.position.x = (Math.random() * 2 - 1) * CLOUD_SPAWN_RADIUS_X;
+  cloud.position.y = cloud.userData.baseY;
+  if (randomizeZ) {
+    cloud.position.z = -Math.random() * CLOUD_LOOP_LENGTH;
+  } else {
+    cloud.position.z -= CLOUD_LOOP_LENGTH;
+  }
+}
+
+function createCloudLayer() {
+  cloudGroup.clear();
+  cloudMeshes.length = 0;
+  for (let index = 0; index < CLOUD_COUNT; index += 1) {
+    const cloud = createCloud();
+    seedCloudState(cloud);
+    resetCloudPosition(cloud, true);
+    cloudGroup.add(cloud);
+    cloudMeshes.push(cloud);
+  }
+}
+
+function resetCloudLayer(randomizeZ = true, reseedDynamics = false) {
+  cloudMeshes.forEach((cloud) => {
+    if (reseedDynamics) {
+      seedCloudState(cloud);
+    } else {
+      cloud.userData.floatPhase = Math.random() * Math.PI * 2;
+    }
+    resetCloudPosition(cloud, randomizeZ);
+  });
+}
+
+function updateCloudLayer(delta, player) {
+  if (!cloudMeshes.length) {
+    return;
+  }
+  const baseSpeed = player.speed * CLOUD_SCROLL_FACTOR;
+  cloudMeshes.forEach((cloud) => {
+    const data = cloud.userData;
+    data.floatPhase += delta * data.floatSpeed;
+    cloud.position.y =
+      data.baseY + Math.sin(data.floatPhase) * data.floatAmplitude;
+    cloud.position.x += data.driftX * delta;
+    cloud.position.z += baseSpeed * data.scrollFactor * delta;
+
+    if (
+      cloud.position.x > CLOUD_SPAWN_RADIUS_X ||
+      cloud.position.x < -CLOUD_SPAWN_RADIUS_X
+    ) {
+      cloud.position.x =
+        (Math.random() * 2 - 1) * CLOUD_SPAWN_RADIUS_X;
+    }
+
+    if (cloud.position.z > CLOUD_RESET_Z) {
+      resetCloudPosition(cloud, false);
+    }
+  });
+}
 
 function createBlockBuilding(width, height, depth, palette) {
   const group = new THREE.Group();
@@ -238,6 +354,7 @@ export function createCityScenery() {
     sceneryGroup.add(segment);
     scenerySegments.push(segment);
   }
+  createCloudLayer();
 }
 
 export function resetScenery() {
@@ -245,6 +362,7 @@ export function resetScenery() {
   scenerySegments.forEach((segment, index) => {
     segment.position.set(0, 0, -index * SCENERY_SEGMENT_LENGTH - 16);
   });
+  resetCloudLayer(true, true);
 }
 
 export function updateScenery(delta, player) {
@@ -261,4 +379,5 @@ export function updateScenery(delta, player) {
       segment.position.z -= SCENERY_LOOP_LENGTH;
     }
   });
+  updateCloudLayer(delta, player);
 }
