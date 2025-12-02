@@ -4,6 +4,7 @@ const overlayTitle = document.getElementById("overlay-title");
 const overlayBody = document.getElementById("overlay-body");
 const levelButtonsContainer = document.getElementById("level-buttons");
 const levelScoresContainer = document.getElementById("level-scores");
+const resetBestButton = document.getElementById("reset-best-button");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 const speedEl = document.getElementById("speed");
@@ -27,6 +28,7 @@ export {
   overlayBody,
   levelButtonsContainer,
   levelScoresContainer,
+  resetBestButton,
   scoreEl,
   bestEl,
   speedEl,
@@ -86,6 +88,7 @@ export function initializeUiText(strings) {
   if (bestLabelEl) bestLabelEl.textContent = strings.bestLabel;
   if (speedLabelEl) speedLabelEl.textContent = strings.speedLabel;
   if (howtoHeading) howtoHeading.textContent = strings.instructionsHeading;
+  if (resetBestButton) resetBestButton.textContent = strings.resetHighScore;
   if (howtoList) {
     howtoList.innerHTML = "";
     strings.instructions.forEach((item) => {

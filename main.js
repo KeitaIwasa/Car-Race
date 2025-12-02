@@ -56,6 +56,7 @@ import {
   renderLevelSelectors,
   updateLevelBests,
   highlightActiveLevel,
+  resetBestButton,
 } from "./ui.js";
 import {
   bindKeyboardControls,
@@ -339,3 +340,17 @@ bindTouchControls({
   onMoveRight: () => movePlayer(state, 1),
   onJumpAction: handleJumpAction,
 });
+
+function resetHighScores() {
+  LEVEL_LIST.forEach((level) => {
+    state.bestByLevel[level.id] = 0;
+    localStorage.removeItem(level.storageKey);
+  });
+  state.best = 0;
+  updateHud(state);
+  updateLevelBests(state.bestByLevel);
+}
+
+if (resetBestButton) {
+  resetBestButton.addEventListener("click", resetHighScores);
+}

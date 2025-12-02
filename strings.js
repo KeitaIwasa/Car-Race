@@ -16,4 +16,5 @@ export const STRINGS = {
   scorePrefix: "スコア",
   gameOverPromptSuffix: "もう一度挑戦しますか？",
   highScoreUpdate: "最高スコア更新！",
+  resetHighScore: "ハイスコアをリセット",
 };
