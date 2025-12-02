@@ -52,7 +52,10 @@ export function updatePlayer(state, delta) {
     state.player.jumpCooldown - delta
   );
   const elapsed = Math.max(0, state.elapsedTime || 0);
-  state.player.targetSpeed = Math.log10(elapsed + 10) * PLAYER_SPEED_LOG_FACTOR + 20;
+  const speedMultiplier = state.levelSpeedMultiplier || 1;
+  const baseTargetSpeed =
+    Math.log10(elapsed + 10) * PLAYER_SPEED_LOG_FACTOR + 20;
+  state.player.targetSpeed = baseTargetSpeed * speedMultiplier;
   state.player.speed +=
     (state.player.targetSpeed - state.player.speed) *
     Math.min(1, delta * PLAYER_ACCEL_RATE);

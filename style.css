@@ -133,6 +133,65 @@ body {
   line-height: 1.6;
 }
 
+.level-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.level-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  box-shadow: none;
+  transition: border-color 0.2s ease, transform 0.12s ease;
+}
+
+.level-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #22d3ee);
+  border-color: rgba(255, 255, 255, 0.32);
+  transform: translateY(-2px);
+}
+
+.level-scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.level-score {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: center;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.level-score.active {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.level-score__name {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.level-score__value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 .btn {
   background: linear-gradient(135deg, #ff4d4d, #ff824d);
   color: #fff;

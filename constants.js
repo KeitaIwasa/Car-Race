@@ -20,7 +20,32 @@ export const PLAYER_START_SPEED = 55;
 export const PLAYER_START_TARGET_SPEED = 55;
 export const PLAYER_SPEED_LOG_FACTOR = 40;
 
-export const STORAGE_KEY = "street-sprint-best";
+// レベル設定（スピード係数とハイスコア保存キー）
+export const LEVELS = {
+  EASY: {
+    id: "easy",
+    label: "初級",
+    speedMultiplier: 0.8,
+    storageKey: "street-sprint-best-easy",
+  },
+  NORMAL: {
+    id: "normal",
+    label: "中級",
+    speedMultiplier: 1,
+    storageKey: "street-sprint-best",
+  },
+  HARD: {
+    id: "hard",
+    label: "上級",
+    speedMultiplier: 1.3,
+    storageKey: "street-sprint-best-hard",
+  },
+};
+
+export const DEFAULT_LEVEL_ID = LEVELS.NORMAL.id;
+
+// 互換性のため残しておく（中級のストレージキーと同じ）
+export const STORAGE_KEY = LEVELS.NORMAL.storageKey;
 
 export const SCENERY_SEGMENT_LENGTH = 28;
 export const SCENERY_SEGMENT_COUNT = 14;

@@ -2,7 +2,8 @@ const canvas = document.getElementById("game");
 const overlay = document.getElementById("overlay");
 const overlayTitle = document.getElementById("overlay-title");
 const overlayBody = document.getElementById("overlay-body");
-const startButton = document.getElementById("start-button");
+const levelButtonsContainer = document.getElementById("level-buttons");
+const levelScoresContainer = document.getElementById("level-scores");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 const speedEl = document.getElementById("speed");
@@ -24,7 +25,8 @@ export {
   overlay,
   overlayTitle,
   overlayBody,
-  startButton,
+  levelButtonsContainer,
+  levelScoresContainer,
   scoreEl,
   bestEl,
   speedEl,
@@ -73,10 +75,9 @@ export function hideOverlay() {
   overlay.classList.add("hidden");
 }
 
-export function showOverlay({ title, body, buttonLabel }) {
+export function showOverlay({ title, body }) {
   overlayTitle.textContent = title;
   overlayBody.textContent = body;
-  startButton.textContent = buttonLabel;
   overlay.classList.remove("hidden");
 }
 
@@ -93,4 +94,61 @@ export function initializeUiText(strings) {
       howtoList.appendChild(li);
     });
   }
+}
+
+export function renderLevelSelectors(levels, onLevelSelect) {
+  if (!levelButtonsContainer || !levelScoresContainer) {
+    return;
+  }
+
+  levelButtonsContainer.innerHTML = "";
+  levelScoresContainer.innerHTML = "";
+
+  levels.forEach((level) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn level-btn";
+    btn.dataset.levelId = level.id;
+    btn.textContent = level.label;
+    btn.addEventListener("click", () => {
+      onLevelSelect?.(level.id);
+    });
+    levelButtonsContainer.appendChild(btn);
+
+    const card = document.createElement("div");
+    card.className = "level-score";
+    card.dataset.levelId = level.id;
+
+    const name = document.createElement("span");
+    name.className = "level-score__name";
+    name.textContent = level.label;
+
+    const value = document.createElement("span");
+    value.className = "level-score__value";
+    value.dataset.levelBest = level.id;
+    value.textContent = "0";
+
+    card.appendChild(name);
+    card.appendChild(value);
+    levelScoresContainer.appendChild(card);
+  });
+}
+
+export function updateLevelBests(bestByLevel = {}) {
+  if (!levelScoresContainer) return;
+  levelScoresContainer.querySelectorAll("[data-level-best]").forEach((el) => {
+    const levelId = el.dataset.levelBest;
+    const best = bestByLevel[levelId] ?? 0;
+    el.textContent = Math.floor(best);
+  });
+}
+
+export function highlightActiveLevel(levelId) {
+  if (!levelButtonsContainer || !levelScoresContainer) return;
+  levelButtonsContainer.querySelectorAll(".level-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.levelId === levelId);
+  });
+  levelScoresContainer.querySelectorAll(".level-score").forEach((card) => {
+    card.classList.toggle("active", card.dataset.levelId === levelId);
+  });
 }

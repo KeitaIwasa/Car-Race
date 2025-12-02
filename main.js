@@ -2,7 +2,8 @@ import {
   GAME_STATE,
   LANES,
   PLAYER_BASE_Y,
-  STORAGE_KEY,
+  LEVELS,
+  DEFAULT_LEVEL_ID,
   BEAR_SPAWN_BASE_INTERVAL,
   PLAYER_START_SPEED,
   PLAYER_START_TARGET_SPEED,
@@ -51,8 +52,10 @@ import {
   updateHud,
   showOverlay,
   hideOverlay,
-  startButton,
   initializeUiText,
+  renderLevelSelectors,
+  updateLevelBests,
+  highlightActiveLevel,
 } from "./ui.js";
 import {
   bindKeyboardControls,
@@ -64,17 +67,42 @@ import {
   syncViewportLayout,
 } from "./viewport.js";
 
+const LEVEL_LIST = Object.values(LEVELS);
+const LEVEL_BY_ID = LEVEL_LIST.reduce((acc, level) => {
+  acc[level.id] = level;
+  return acc;
+}, {});
+
+function loadBestScores() {
+  const scores = {};
+  LEVEL_LIST.forEach((level) => {
+    const stored = Number(localStorage.getItem(level.storageKey));
+    scores[level.id] = Number.isFinite(stored) ? stored : 0;
+  });
+  return scores;
+}
+
+const bestByLevel = loadBestScores();
+const initialLevel =
+  LEVEL_BY_ID[DEFAULT_LEVEL_ID] || LEVEL_LIST[0];
+
 const playerCar = createPlayerCar();
 scene.add(playerCar);
 
+const initialSpeedMultiplier =
+  initialLevel?.speedMultiplier ?? 1;
+
 const state = {
   gameState: GAME_STATE.READY,
+  selectedLevelId: initialLevel?.id,
+  levelSpeedMultiplier: initialSpeedMultiplier,
   player: {
     mesh: playerCar,
     laneIndex: 1,
     targetX: LANES[1],
-    speed: PLAYER_START_SPEED,
-    targetSpeed: PLAYER_START_TARGET_SPEED,
+    speed: PLAYER_START_SPEED * initialSpeedMultiplier,
+    targetSpeed:
+      PLAYER_START_TARGET_SPEED * initialSpeedMultiplier,
     jump: {
       active: false,
       velocity: 0,
@@ -93,11 +121,22 @@ const state = {
   wrongWayTimer: WRONG_WAY_SPAWN_INTERVAL,
   score: 0,
   elapsedTime: 0,
-  best: Number(localStorage.getItem(STORAGE_KEY)) || 0,
+  bestByLevel: { ...bestByLevel },
+  best: bestByLevel[initialLevel?.id] || 0,
   lastTime: performance.now(),
   coinTimer: 0,
   nextCoinInterval: 0,
 };
+
+function selectLevel(levelId) {
+  const nextLevel = LEVEL_BY_ID[levelId] || initialLevel;
+  state.selectedLevelId = nextLevel.id;
+  state.levelSpeedMultiplier = nextLevel.speedMultiplier;
+  state.best = state.bestByLevel[nextLevel.id] || 0;
+  highlightActiveLevel(nextLevel.id);
+  updateLevelBests(state.bestByLevel);
+  updateHud(state);
+}
 
 function rollCoinInterval() {
   return (
@@ -116,10 +155,16 @@ updateHud(state);
 
 initializeUiText(STRINGS);
 
+renderLevelSelectors(LEVEL_LIST, (levelId) => {
+  startGame(levelId);
+});
+
+updateLevelBests(state.bestByLevel);
+highlightActiveLevel(state.selectedLevelId);
+
 showOverlay({
-  title: "Street Sprint 3D by 藤井太田研",
+  title: "Street Sprint 3D",
   body: STRINGS.introBody,
-  buttonLabel: STRINGS.startButton,
 });
 
 initializeViewportLayout(resizeRenderer);
@@ -130,8 +175,10 @@ function resetGame() {
   state.player.mesh.position.set(LANES[1], PLAYER_BASE_Y, 0);
   state.player.mesh.rotation.set(0, 0, 0);
   state.player.mesh.position.y = PLAYER_BASE_Y;
-  state.player.speed = PLAYER_START_SPEED;
-  state.player.targetSpeed = PLAYER_START_TARGET_SPEED;
+  state.player.speed =
+    PLAYER_START_SPEED * state.levelSpeedMultiplier;
+  state.player.targetSpeed =
+    PLAYER_START_TARGET_SPEED * state.levelSpeedMultiplier;
   state.player.jump.active = false;
   state.player.jump.velocity = 0;
   state.player.jumpCooldown = 0;
@@ -156,10 +203,11 @@ function resetGame() {
   updateHud(state);
 }
 
-function startGame() {
+function startGame(levelId = state.selectedLevelId) {
   if (state.gameState === GAME_STATE.RUNNING) {
     return;
   }
+  selectLevel(levelId);
   resetGame();
   hideOverlay();
   state.gameState = GAME_STATE.RUNNING;
@@ -172,21 +220,24 @@ function endGame() {
     return;
   }
   state.gameState = GAME_STATE.GAME_OVER;
+  const activeLevel =
+    LEVEL_BY_ID[state.selectedLevelId] || initialLevel;
   let bodyText = `${STRINGS.scorePrefix}: ${Math.floor(
     state.score
   )}\n${STRINGS.gameOverPromptSuffix}`;
 
   if (state.score > state.best) {
     state.best = Math.floor(state.score);
-    localStorage.setItem(STORAGE_KEY, state.best);
+    state.bestByLevel[activeLevel.id] = state.best;
+    localStorage.setItem(activeLevel.storageKey, state.best);
     updateHud(state);
+    updateLevelBests(state.bestByLevel);
     bodyText += `\n${STRINGS.highScoreUpdate}`;
   }
 
   showOverlay({
     title: "Game Over",
     body: bodyText,
-    buttonLabel: STRINGS.retryButton,
   });
 }
 
@@ -231,7 +282,8 @@ function update(delta) {
   // 距離ベースで敵車の生成間隔を管理
   state.spawnDistance += state.player.speed * delta;
   state.wrongWayTimer += delta;
-  const referenceSpeed = PLAYER_START_SPEED;
+  const referenceSpeed =
+    PLAYER_START_SPEED * state.levelSpeedMultiplier;
   const baseDistance = state.spawnInterval * referenceSpeed;
   const minDistance = 0.65 * referenceSpeed;
   const scoreDistanceFactor = 0.0007 * referenceSpeed;
@@ -287,5 +339,3 @@ bindTouchControls({
   onMoveRight: () => movePlayer(state, 1),
   onJumpAction: handleJumpAction,
 });
-
-startButton.addEventListener("click", handleStart);
